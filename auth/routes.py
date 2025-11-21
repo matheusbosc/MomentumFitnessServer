@@ -55,7 +55,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         return user_id
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid Token!")
-    
+
+@router.post("/check_refresh_status")
 @router.post("/refresh_token")
 def refresh_token(body: RefreshRequest = None):
     auth_token = body.access_token
