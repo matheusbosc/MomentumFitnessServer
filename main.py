@@ -3,6 +3,6 @@
 from fastapi import FastAPI
 from auth.routes import router as auth_router
 
-app = FastAPI()
+app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
 
-app.include_router(auth_router, prefix="/v1/auth")
+app.include_router(auth_router, prefix="/api/v1/auth")
