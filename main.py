@@ -5,4 +5,4 @@ from auth.routes import router as auth_router
 
 app = FastAPI()
 
-app.include_router(auth_router, prefix="/api/v1/auth")
+app.include_router(auth_router, prefix="/v1/auth")
