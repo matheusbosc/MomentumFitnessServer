@@ -2,3 +2,6 @@ FastAPI
 uvicorn
 PyJWT
 pydantic
+sqlalchemy
+psycopg2-binary
+passLib

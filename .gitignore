@@ -1,3 +1,8 @@
 # Created by venv; see https://docs.python.org/3/library/venv.html
-*
-!/dockerfile
+/__pycache__
+/bin
+/*/__pycache__
+/include
+/lib
+/lib64
+/pyvenv.cfg
