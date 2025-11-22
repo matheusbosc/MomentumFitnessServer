@@ -3,12 +3,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "postgresql://admin:Engosx123!%40%23@localhost:5432/momentumdb"
+DATABASE_URL = "postgresql://admin:Engosx123!%40%23@192.168.2.180:5432/momentumdb"
 
-engine = create_engine(DATABASE_URL, echo=True)
-
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
 
 def get_db():
