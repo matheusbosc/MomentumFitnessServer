@@ -77,11 +77,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
         user: User = db.query(User).filter(User.username == user_id).first() # --- SELECT * FROM users WHERE email = ? LIMIT 1;
         if not user:
-            raise HTTPException(status_code=401, detail="invalid Credentials")
+            raise HTTPException(status_code=400, detail="invalid Credentials")
 
         return user
     except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="invalid Token!")
+        raise HTTPException(status_code=400, detail="invalid Token!")
 
 # endregion
 
@@ -106,7 +106,7 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
             break
 
         else:
-            raise HTTPException(status_code=401, detail="invalid Credentials")
+            raise HTTPException(status_code=400, detail="invalid credentials")
 
     else:
         query = (
@@ -120,10 +120,10 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
             break
 
         else:
-            raise HTTPException(status_code=401, detail="invalid Credentials")
+            raise HTTPException(status_code=400, detail="invalid credentials")
     
     if not verify_password(password, query_user.password):
-        raise HTTPException(status_code=401, detail="invalid Credentials!")
+        raise HTTPException(status_code=400, detail="invalid credentials!")
 
     # 2. Create IDs
     refresh_id_uuid = uuid.uuid4()
@@ -204,14 +204,14 @@ def refresh_token(body: RefreshRequest, db: Session = Depends(get_db)):
         payload = jwt.decode(body.access_token, AUTH_SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
     except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="invalid token")
+        raise HTTPException(status_code=400, detail="invalid token")
 
     # Decode refresh token
     try:
         payload2 = jwt.decode(body.refresh_token, REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
         refresh_id = payload2.get("sub")
     except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="invalid token")
+        raise HTTPException(status_code=400, detail="invalid token")
 
     # Look up in DB
     stored: RefreshToken = db.query(RefreshToken).filter(
@@ -220,7 +220,7 @@ def refresh_token(body: RefreshRequest, db: Session = Depends(get_db)):
     ).first()
 
     if not stored:
-        raise HTTPException(status_code=401, detail="token mismatch")
+        raise HTTPException(status_code=400, detail="token mismatch")
 
     # Issue new tokens
     new_access = create_access_token({"sub": user_id})
@@ -240,16 +240,6 @@ def refresh_token(body: RefreshRequest, db: Session = Depends(get_db)):
         "access_token": new_access,
         "refresh_token": new_refresh_token
     }
-
-@router.get("/profile")
-def get_profile(user_id: str, db: Session = Depends(get_db)):
-    user: User = get_current_user(user_id, db=db)
-    return {"user_id": user.user_id,
-            "username": user.username,
-            "email": user.email,
-            "first_name": user.firstname,
-            "last_name": user.lastname,
-            "message": "Protected Content"}
 
 @router.get("/dev/gen_password")
 def gen_pass(password: str):
