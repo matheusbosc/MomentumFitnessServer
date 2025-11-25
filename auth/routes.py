@@ -9,18 +9,26 @@ from sqlalchemy import select, delete
 from models import User, RefreshToken
 from db import get_db
 from passlib.context import CryptContext
-import uuid
-import re
+from dotenv import load_dotenv
+from pathlib import Path
 
+import uuid
+import os
+import re
 import jwt
+
+parent = Path(__file__).resolve().parent.parent  # 2 levels up
+env_path = parent / ".env"
+load_dotenv(dotenv_path=env_path)
+env = os.environ
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-AUTH_SECRET_KEY = "593a862c9354f739d973edba2fa1924ef6eda83ed25b038f684253d7a213a186"
-REFRESH_SECRET_KEY = "ed8384a37d0a1b10a919a8e292c25f769c7e08f030de183963c1c90deb522d05"
+AUTH_SECRET_KEY = os.getenv("AUTH_SECRET_KEY")
+REFRESH_SECRET_KEY = os.getenv("REFRESH_SECRET_KEY")
 ALGORITHM = "HS256"
 AUTH_EXPIRY = 300#3600
 REFRESH_EXPIRY = 120#2592000

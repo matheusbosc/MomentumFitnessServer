@@ -6,3 +6,4 @@ sqlalchemy
 psycopg2-binary
 passLib
 argon2_cffi
+python-dotenv
