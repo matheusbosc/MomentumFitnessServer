@@ -116,7 +116,8 @@ def get_profile(user_id, body: AuthToken, db: Session = Depends(get_db)):
             "message": "Protected Content"}
 
 @router.delete("/user/{username}")
-def get_profile(username, body: AuthToken, db: Session = Depends(get_db)):
+def delete_profile(username, body: AuthToken, db: Session = Depends(get_db)):
     delete_user(token = body.access_token, db = db)
+    return { "Status": "Success" }
 
 # endregion
