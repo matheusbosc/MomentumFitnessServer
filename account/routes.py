@@ -77,10 +77,9 @@ def delete_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_d
     except jwt.PyJWTError:
         raise HTTPException(status_code=400, detail="invalid Token!")
     
-    user: User = payload.get("sub")
-    user_id = user.user_id
+    user_id = payload.get("sub")
 
-    query = select(User).where(User.user_id == user_id).limit(1)
+    query = select(User).where(User.username == user_id).limit(1)
 
     for q_user in db.scalars(query):
         break
@@ -97,7 +96,7 @@ def delete_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_d
 # region ENDPOINTS
 
 @router.get("/user/{username}")
-def get_profile(username, body = AuthToken, db: Session = Depends(get_db)):
+def get_profile(username, body: AuthToken, db: Session = Depends(get_db)):
     user: User = get_user(token=body.access_token, user_id="uname\\" + username, db=db)
     return {"user_id": user.user_id,
             "username": user.username,
@@ -107,7 +106,7 @@ def get_profile(username, body = AuthToken, db: Session = Depends(get_db)):
             "message": "Protected Content"}
 
 @router.get("/user/id/{user_id}")
-def get_profile(user_id, body = AuthToken, db: Session = Depends(get_db)):
+def get_profile(user_id, body: AuthToken, db: Session = Depends(get_db)):
     user: User = get_current_user(token=body.access_token, user_id="uname\\" + user_id, db=db)
     return {"user_id": user.user_id,
             "username": user.username,
@@ -117,7 +116,7 @@ def get_profile(user_id, body = AuthToken, db: Session = Depends(get_db)):
             "message": "Protected Content"}
 
 @router.delete("/user/{username}")
-def get_profile(username, body = AuthToken, db: Session = Depends(get_db)):
+def get_profile(username, body: AuthToken, db: Session = Depends(get_db)):
     delete_user(token = body.access_token, db = db)
 
 # endregion
