@@ -236,7 +236,6 @@ def refresh_token(body: RefreshRequest, db: Session = Depends(get_db)):
     
     user = RefreshToken(
         user_id = user_id,
-        id = new_access,
         refresh_id = new_refresh_token
     )
 
