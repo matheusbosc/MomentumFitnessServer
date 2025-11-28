@@ -234,12 +234,9 @@ def refresh_token(body: RefreshRequest, db: Session = Depends(get_db)):
         delete(RefreshToken).where(RefreshToken.id == stored.id)
     )
     
-    user = RefreshToken(
-        user_id = user_id,
-        refresh_id = new_refresh_token
-    )
+    new_token = RefreshToken(user_id=user_id, refresh_id=new_refresh_id)
 
-    db.add(user)
+    db.add(new_token)
 
     db.commit()
 
