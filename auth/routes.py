@@ -245,7 +245,7 @@ def refresh_token(body: RefreshRequest, db: Session = Depends(get_db)):
 
     return {
         "access_token": new_access,
-        "refresh_token": new_refresh_token
+        "refresh_token": new_refresh_id
     }
 
 @router.get("/dev/gen_password")
