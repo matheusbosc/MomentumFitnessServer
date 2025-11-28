@@ -31,7 +31,7 @@ AUTH_SECRET_KEY = os.getenv("AUTH_SECRET_KEY")
 REFRESH_SECRET_KEY = os.getenv("REFRESH_SECRET_KEY")
 ALGORITHM = "HS256"
 AUTH_EXPIRY = 300#3600
-REFRESH_EXPIRY = 120#2592000
+REFRESH_EXPIRY = 600#2592000
 EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
 class RefreshRequest(BaseModel): 
@@ -233,7 +233,15 @@ def refresh_token(body: RefreshRequest, db: Session = Depends(get_db)):
     db.execute(
         delete(RefreshToken).where(RefreshToken.id == stored.id)
     )
-    stored.refresh_id = new_refresh_id
+    
+    user = RefreshToken(
+        user_id = user_id,
+        id = new_access,
+        refresh_id = new_refresh_token
+    )
+
+    db.add(user)
+
     db.commit()
 
     return {
