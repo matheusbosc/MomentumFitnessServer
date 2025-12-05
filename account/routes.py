@@ -15,6 +15,7 @@ from auth.routes import hash_password
 
 import os
 import jwt
+import re
 
 parent = Path(__file__).resolve().parent.parent  # 2 levels up
 env_path = parent / ".env"
@@ -28,6 +29,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 AUTH_SECRET_KEY = os.getenv("AUTH_SECRET_KEY")
 ALGORITHM = "HS256"
+EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
 class AuthToken(BaseModel):
     access_token: str
@@ -55,27 +57,18 @@ def get_user(token: str = Depends(oauth2_scheme), user_id: str = "", db: Session
         raise HTTPException(status_code=400, detail="invalid Token!")
     
     user: User
-
-    if user_id.startswith("uname\\"):
-        user_id = user_id[6::]
+        
+    if re.fullmatch(EMAIL_REGEX, user_id):
+        query = select(User).where(User.email == user_id).limit(1)
+    else:
         query = select(User).where(User.username == user_id).limit(1)
 
-        for q_user in db.scalars(query):
-            user = q_user
-            break
-        else:
-            raise HTTPException(status_code=400, detail="invalid credentials")
-    if user_id.startswith("id\\"):
-        user_id = user_id[3::]
-        query = select(User).where(User.user_id == user_id).limit(1)
-
-        for q_user in db.scalars(query):
-            user = q_user
-            break
-        else:
-            raise HTTPException(status_code=400, detail="invalid credentials")
+    for q_user in db.scalars(query):
+        user = q_user
+        break
     else:
-        raise HTTPException(status_code=500, detail="endpoint code not correct")
+        raise HTTPException(status_code=400, detail="invalid credentials")
+
 
     return user
 
@@ -102,25 +95,14 @@ def delete_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_d
 
 # region ENDPOINTS
 
-@router.get("/user/{username}")
+@router.post("/user/{username}")
 def get_profile(username, body: AuthToken, db: Session = Depends(get_db)):
-    user: User = get_user(token=body.access_token, user_id="uname\\" + username, db=db)
+    user: User = get_user(token=body.access_token, user_id=username, db=db)
     return {"user_id": user.user_id,
             "username": user.username,
             "email": user.email,
             "first_name": user.firstname,
-            "last_name": user.lastname,
-            "message": "Protected Content"}
-
-@router.get("/user/id/{user_id}")
-def get_profile(user_id, body: AuthToken, db: Session = Depends(get_db)):
-    user: User = get_current_user(token=body.access_token, user_id="uname\\" + user_id, db=db)
-    return {"user_id": user.user_id,
-            "username": user.username,
-            "email": user.email,
-            "first_name": user.firstname,
-            "last_name": user.lastname,
-            "message": "Protected Content"}
+            "last_name": user.lastname}
 
 @router.delete("/user/{username}")
 def delete_profile(username, body: AuthToken, db: Session = Depends(get_db)):
